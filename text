@@ -1,0 +1,11 @@
+from sklearn.ensemble import ExtraTreesClassifier (feature selection)
+
+[2419816 rows x 17 columns]
+[ 0.12485089  0.1408849   0.05601335  0.06410464  0.02297945  0.0081924 0.01275259  0.01515112  0.06930724  0.10513198  0.0405172   0.09656258 0.06587979  0.10707275  0.02468448  0.02715965  0.01875498]
+TimeToEnd	DistanceToRadar	Composite	HybridScan	HydrometeorType	RR1	RR2	RR3	RadarQualityIndex	Reflectivity	ReflectivityQC	RhoHV	Velocity	Zdr	LogWaterVolume	MassWeightedMean	MassWeightedSD
+
+TimeToEnd DistanceToRadar
+
+-find mean for radar quality index < 999 > 0 karena ada yang -99900, dapet 0.321765 untuk replace quality index > 1 ke 0.321765 dan index < 0 direplace 0
+-setelah direplace, feature importance radar quality index
+[ 0.12376083  0.13970208  0.04244106  0.07635939  0.02460224  0.00809783 0.00926414  0.01583206  0.08869733  0.10667001  0.0297941   0.09034455 0.06457348  0.11170558  0.02594445  0.02091353  0.02129733]
