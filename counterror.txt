@@ -1,0 +1,35 @@
+99900
+    Composite : 2053908
+    HybridScan : 2156768
+    RR1 : 5553
+    RR2 : 2364791
+    RR3 : 2365248
+    RadarQualityIndex : 57
+    Reflectivity : 4
+    ReflectivityQC : 2016198
+    RhoHV : 69317
+    Velocity : 565620
+    Zdr : 69312
+
+99901
+    RhoHV : 1
+    Velocity : 175216
+
+99903
+    HybridScan : 8898
+    RR2 : 1
+    RR3 : 2
+    RadarQualityIndex : 2
+    ReflectivityQC : 98998
+    RhoHV : 46741
+    Velocity : 46947
+    Zdr : 46741
+
+999
+    RR1 : 27
+    RadarQualityIndex : 799789
+
+nan
+    LogWaterVolume : 2244149
+    MassWeightedMean : 2244149
+    MassWeightedSD : 2244149
