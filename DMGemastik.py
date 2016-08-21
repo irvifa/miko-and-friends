@@ -6,80 +6,99 @@ Created on Aug 13, 2016
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import ExtraTreesClassifier
-from sklearn import linear_model, metrics
-from sklearn.cross_validation import train_test_split
+from sklearn import metrics
 from sklearn.neural_network import BernoulliRBM
 from sklearn.pipeline import Pipeline
 from sklearn.externals import joblib
-import math
+from sklearn.svm.classes import LinearSVC
 
-
-dat = pd.read_csv("separate.csv")
-dat = dat.fillna(0)
-tmp = dat["Expected"]
-tmp = np.sign(tmp)
-dat["Expected"] = tmp
-dat.to_csv("hehe.csv", index=False)
-Y = dat["Expected"]
-dat = dat.drop("Expected", 1)
-dat = dat.drop("Id",1)
-dat = dat.drop("Kdp", 1)
-radar_quality = dat[dat["RadarQualityIndex"] < 999]
-radar_quality = radar_quality[radar_quality["RadarQualityIndex"] > 0]
-print radar_quality.mean()
-k = dat["RadarQualityIndex"].copy()
-k[k < 0] = 0.0
-k[k > 1] = 0.321765
-dat["RadarQualityIndex"] = k
-print dat
-# print radar_quality["RadarQualityIndex"].mean()
-# dat = dat.drop("HybridScan", 1)
-X = dat.copy()
- 
-print X
-clf = ExtraTreesClassifier()
-clf = clf.fit(X, Y)
-print clf.feature_importances_ 
-
-# X_train, X_test, Y_train, Y_test = train_test_split(X, Y,
-#                                                     test_size=0.2,
-#                                                     random_state=1)
-# logistic = linear_model.LogisticRegression()
-# rbm = BernoulliRBM(random_state=0, verbose=False)
-# 
-# classifier = Pipeline(steps=[('rbm', rbm), ('logistic', logistic)])
-# 
-# rbm.learning_rate = 0.06
-# rbm.n_iter = 20
-# # More components tend to give better prediction performance, but larger
-# # fitting time
-# rbm.n_components = 100
-# logistic.C = 1000.0
-# 
-# # Training RBM-Logistic Pipeline
-# print "X_Train"
-# print X_train
-# print "Y_Train"
-# print Y_train
-# classifier.fit(X_train, Y_train)
-# 
-# # Training Logistic regression
-# logistic_classifier = linear_model.LogisticRegression(C=100.0)
-# logistic_classifier.fit(X_train, Y_train)
-# 
-# print()
-# print("Logistic regression using RBM features:\n%s\n" % (
-#     metrics.classification_report(
-#         Y_test,
-#         classifier.predict(X_test))))
-# 
-# print("Logistic regression using raw pixel features:\n%s\n" % (
-#     metrics.classification_report(
-#         Y_test,logistic_classifier.predict(X_test))))
-# 
-# joblib.dump(logistic_classifier, 'logistic.pkl')
-# joblib.dump(classifier,"rbm.pkl")
-
-
+def remap(x):
+    if x == np.float64(-99900):
+        return -14
+    elif x == np.float64(-99901):
+        return np.NaN
+    elif x == np.float64(-99903):
+        return np.NaN
+    elif x == np.float64(999):
+        return np.NaN
+    else:
+        return x
+        
+class DeepLearning:
+    
+    def __init__(self, dataset_path):
+        self.data = pd.read_csv(dataset_path)
+        self.Y = self.data["Expected"]
+        self.classifier = None
+    def preprocessing(self):
+        k = self.data["Expected"]
+        k[ k > 0 ] = 1
+        self.data["Expected"] = k
+        self.data = self.data.applymap(lambda x: remap(x))
+        data = self.data.drop("Expected", 1)
+        data = data.drop("Id",1)
+        data = data.drop("HydrometeorType",1)
+        for column in data:
+            dat = data[column]
+            mi = dat.min(axis=1,skipna=True)
+            ma = dat.max(axis=1,skipna=True)
+            dat = map(lambda x: (x - mi)/(ma-mi), dat)
+            self.data[column] = dat
+        print self.data  
+    
+    def after_preprocessing(self):
+        dat = self.data.drop(self.data.columns[0],1)
+        dat = dat.drop(self.data.columns[1],1)
+        dat = dat.drop(self.data.columns[6],1)
+        dat = dat.drop(self.data.columns[7],1)
+        dat = dat.drop('IsNoEcho1',1)
+        dat = dat.drop('IsIceCrystal',1)
+        dat = dat.drop('IsGraupel2',1)
+        dat = dat.drop("Expected",1)
+        self.data = dat
+        self.data = self.data.fillna(0)
+#         self.data.to_csv("train_preprocessed.csv",index=False)
+        
+        
+    def get_feature_importance(self):
+        clf = ExtraTreesClassifier()
+        clf = clf.fit(self.data,self.Y)
+        k = self.data.columns
+        l = zip(clf.feature_importances_,k)
+        print sorted(l,reverse=True)
+    
+    def  train(self):
+        rbm = BernoulliRBM(random_state=0, verbose=False)
+        svc = LinearSVC(C=1000.0,class_weight='balanced',max_iter=100)
+        classifier = Pipeline(steps=[('rbm', rbm), ('svm', svc)])
+        
+        rbm.learning_rate = 0.05
+        rbm.n_iter = 30
+        # More components tend to give better prediction performance, but larger
+        # fitting time
+        rbm.n_components = 150
+        
+        classifier.fit(self.data, self.Y)
+        self.classifier = classifier
+        joblib.dump(classifier,"rbm.pkl")
+        
+    def load(self):
+        self.classifier = joblib.load("rbm.pkl")
+        
+    def validation(self):
+        val_set = pd.read_csv("data_validation.csv") 
+        dat = val_set.drop(self.data.columns[0],1)
+        dat = dat.drop(val_set.columns[1],1)
+        dat = dat.drop(val_set.columns[6],1)
+        dat = dat.drop(val_set.columns[7],1)
+        Y = val_set["Expected"]
+        dat = dat.drop("Expected",1)
+        dat = dat.fillna(0)
+        print metrics.classification_report(Y,self.classifier.predict(dat))
+        
+dl = DeepLearning("data_train.csv")
+dl.after_preprocessing()
+dl.train()
+dl.validation()
 
 
