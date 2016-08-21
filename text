@@ -1,11 +1,39 @@
 from sklearn.ensemble import ExtraTreesClassifier (feature selection)
 
+support berarti jumlah row yang berhasil di predict dengan benar
+
 [2419816 rows x 17 columns]
 [ 0.12485089  0.1408849   0.05601335  0.06410464  0.02297945  0.0081924 0.01275259  0.01515112  0.06930724  0.10513198  0.0405172   0.09656258 0.06587979  0.10707275  0.02468448  0.02715965  0.01875498]
 TimeToEnd	DistanceToRadar	Composite	HybridScan	HydrometeorType	RR1	RR2	RR3	RadarQualityIndex	Reflectivity	ReflectivityQC	RhoHV	Velocity	Zdr	LogWaterVolume	MassWeightedMean	MassWeightedSD
 
-TimeToEnd DistanceToRadar
-
 -find mean for radar quality index < 999 > 0 karena ada yang -99900, dapet 0.321765 untuk replace quality index > 1 ke 0.321765 dan index < 0 direplace 0
 -setelah direplace, feature importance radar quality index
 [ 0.12376083  0.13970208  0.04244106  0.07635939  0.02460224  0.00809783 0.00926414  0.01583206  0.08869733  0.10667001  0.0297941   0.09034455 0.06457348  0.11170558  0.02594445  0.02091353  0.02129733]
+
+-replace error code -99900 to -14
+-replace error code -99903 to its mean 0.802594709068 in RhoHV
+-replace error code -99901 to its max in Velocity (35.5)
+
+SCALING FEATURE TO [0-1] Karena Bernoulli RBM featurenya distribusinya Bernoulli
+
+menggunakan weighted class karena classnya imbalance antara 0 dan 1 perhitungannya dengan cara: n_samples / (n_classes * np.bincount(y))
+
+
+hasil feature selection dengan random forest (feature importance, column name)
+[(0.13662948651083298, 'ReflectivityQC'), (0.099600036703564057, 'IsUnknown'), (0.094264637165637419, 'HybridScan'), (0.084096739370182666, 'DistanceToRadar'), (0.077432887984324003, 'TimeToEnd'), (0.067456607814080929, 'RhoHV'), (0.065659644341160131, 'Reflectivity'), (0.065539098791384837, 'Composite'), (0.059740887746168744, 'Zdr'), (0.055218219325127202, 'Velocity'), (0.053722680458143747, 'RadarQualityIndex'), (0.027339897947708081, 'LogWaterVolume'), (0.022690657911301645, 'MassWeightedMean'), (0.022576064904369104, 'MassWeightedSD'), (0.018344262945901801, 'RR3'), (0.015096726945177691, 'RR1'), (0.014770309649618729, 'RR2'), (0.006100681066706002, 'IsAP'), (0.0055835312770639344, 'IsNoEcho2'), (0.0026006091101262825, 'IsModerateRain1'), (0.0014153925458118962, 'IsBirds'), (0.0013838534355957853, 'IsRainOrHail'), (0.0012010326990169709, 'IsGraupel1'), (0.00079823393604316114, 'IswetSnow'), (0.00032349542882254516, 'IsDrySnow'), (0.00030451401873490114, 'IsBigDrops'), (6.1069762131073306e-05, 'IsModerateRain2'), (4.8740205263701385e-05, 'IsHeavyRain'), (0.0, 'IsNoEcho1'), (0.0, 'IsIceCrystal'), (0.0, 'IsGraupel2')]
+
+without selecting feature, model= rbm pipeline to svm:
+precision    recall  f1-score   support
+
+          0       0.74      1.00      0.85   2758608
+          1       0.18      0.00      0.00    960371
+
+avg / total       0.60      0.74      0.63   3718979
+
+dropping 'IsNoEcho1', 'IsIceCrystal', 'IsGraupel2'
+rbm.n_components = 200
+rbm.learning_rate = 0.05
+rbm.n_iter = 30
+result:
+        
+
