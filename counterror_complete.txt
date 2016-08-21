@@ -1,0 +1,38 @@
+data without error : 992009 / 8937959
+data with 1 withour error : 667739
+
+99900
+    Composite : 4913195
+    HybridScan : 5570845
+    RR1 : 51136
+    RR2 : 7568597
+    RR3 : 7569791
+    RadarQualityIndex : 68
+    Reflectivity : 4
+    ReflectivityQC : 5056072
+    RhoHV : 131517
+    Velocity : 1225348
+    Zdr : 131512
+
+99901
+    RhoHV : 6
+    Velocity : 1195411
+
+99903
+    HybridScan : 29370
+    RR2 : 2
+    RR3 : 2
+    RadarQualityIndex : 2
+    ReflectivityQC : 321975
+    RhoHV : 306832
+    Velocity : 307587
+    Zdr : 306832
+
+999
+    RR1 : 40
+    RadarQualityIndex : 1707010
+
+nan
+    LogWaterVolume : 6072382
+    MassWeightedMean : 6072382
+    MassWeightedSD : 6072382
