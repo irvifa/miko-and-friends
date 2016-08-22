@@ -19,6 +19,8 @@ SCALING FEATURE TO [0-1] Karena Bernoulli RBM featurenya distribusinya Bernoulli
 menggunakan weighted class karena classnya imbalance antara 0 dan 1 perhitungannya dengan cara: n_samples / (n_classes * np.bincount(y))
 
 
+terdapat variabel kategorik, oleh karena itu variabel tersebut dipecah dengan melakukan binarization
+
 hasil feature selection dengan random forest (feature importance, column name)
 [(0.13662948651083298, 'ReflectivityQC'), (0.099600036703564057, 'IsUnknown'), (0.094264637165637419, 'HybridScan'), (0.084096739370182666, 'DistanceToRadar'), (0.077432887984324003, 'TimeToEnd'), (0.067456607814080929, 'RhoHV'), (0.065659644341160131, 'Reflectivity'), (0.065539098791384837, 'Composite'), (0.059740887746168744, 'Zdr'), (0.055218219325127202, 'Velocity'), (0.053722680458143747, 'RadarQualityIndex'), (0.027339897947708081, 'LogWaterVolume'), (0.022690657911301645, 'MassWeightedMean'), (0.022576064904369104, 'MassWeightedSD'), (0.018344262945901801, 'RR3'), (0.015096726945177691, 'RR1'), (0.014770309649618729, 'RR2'), (0.006100681066706002, 'IsAP'), (0.0055835312770639344, 'IsNoEcho2'), (0.0026006091101262825, 'IsModerateRain1'), (0.0014153925458118962, 'IsBirds'), (0.0013838534355957853, 'IsRainOrHail'), (0.0012010326990169709, 'IsGraupel1'), (0.00079823393604316114, 'IswetSnow'), (0.00032349542882254516, 'IsDrySnow'), (0.00030451401873490114, 'IsBigDrops'), (6.1069762131073306e-05, 'IsModerateRain2'), (4.8740205263701385e-05, 'IsHeavyRain'), (0.0, 'IsNoEcho1'), (0.0, 'IsIceCrystal'), (0.0, 'IsGraupel2')]
 
@@ -31,9 +33,80 @@ precision    recall  f1-score   support
 avg / total       0.60      0.74      0.63   3718979
 
 dropping 'IsNoEcho1', 'IsIceCrystal', 'IsGraupel2'
-rbm.n_components = 200
+rbm.n_components = 150
 rbm.learning_rate = 0.05
 rbm.n_iter = 30
 result:
-        
+
+
+Try using logistic regression only on validation set:
+precision    recall  f1-score   support
+
+          0       0.93      0.74      0.82   2758608
+          1       0.52      0.83      0.64    960371
+
+avg / total       0.82      0.76      0.78   3718979
+
+
+Try using logistic regression only on test set:
+          0       0.86      0.89      0.88   2202163
+          1       0.65      0.59      0.62    766816
+
+avg / total       0.81      0.81      0.81   2968979
+
+
+Try using rbm pipelined with logistic regression balanced weight
+ precision    recall  f1-score   support
+
+          0       0.88      0.85      0.86   2758608
+          1       0.60      0.66      0.63    960371
+
+avg / total       0.81      0.80      0.80   3718979
+
+using two layered rbms pipelined with logistic regression
+recision    recall  f1-score   support
+
+          0       0.88      0.85      0.86   2758608
+          1       0.60      0.66      0.63    960371
+
+avg / total       0.81      0.80      0.80   3718979
+
+Using Imputer to change missing value (na's) with mean strategy
+
+
+using two layered rbm's pipelined with logistic regression result:
+ precision    recall  f1-score   support
+
+          0       0.90      0.81      0.85   2758608
+          1       0.57      0.75      0.65    960371
+
+avg / total       0.82      0.79      0.80   3718979
+
+features importance:
+
+[(0.13310983573441554, 'HybridScan'), (0.09513149767259077, 'Reflectivity'), (0.082649611689854574, 'IsUnknown'), (0.079805928676747004, 'DistanceToRadar'), (0.075399303818005858, 'TimeToEnd'), (0.074730533884314179, 'Composite'), (0.06257207985629834, 'RhoHV'), (0.059170850879883795, 'RadarQualityIndex'), (0.058958818035909855, 'Zdr'), (0.055042462995588168, 'Velocity'), (0.044126782926384361, 'ReflectivityQC'), (0.02869301850717168, 'LogWaterVolume'), (0.027935276955345877, 'IsNoEcho2'), (0.024049433163812153, 'MassWeightedSD'), (0.02372916255885496, 'MassWeightedMean'), (0.016103802085923526, 'IsModerateRain1'), (0.015216453508437566, 'RR2'), (0.015167892371815705, 'RR1'), (0.015062489280579008, 'RR3'), (0.0048434372576481111, 'IsAP'), (0.0028912994171815857, 'IsGraupel1'), (0.0023495899112635672, 'IsRainOrHail'), (0.0016809042375424458, 'IsBirds'), (0.00068256951249158775, 'IswetSnow'), (0.00051915568735089244, 'IsDrySnow'), (0.00028965301896793569, 'IsBigDrops'), (5.1629364546016905e-05, 'IsModerateRain2'), (3.6526991074991303e-05, 'IsHeavyRain')]
+
+there are importance's change, droppping 
+(0.00068256951249158775, 'IswetSnow'), 
+(0.00051915568735089244, 'IsDrySnow'), 
+(0.00028965301896793569, 'IsBigDrops'), 
+(5.1629364546016905e-05, 'IsModerateRain2'), 
+(3.6526991074991303e-05, 'IsHeavyRain')
+
+result two layer rbm 75 layer pipeline with logistic
+
+precision    recall  f1-score   support
+
+          0       0.91      0.80      0.85   2758608
+          1       0.57      0.76      0.65    960371
+
+avg / total       0.82      0.79      0.80   3718979
+
+using two layer rbm pipelined with SVM with RBF kernel:
+
+
+
+
+
+
 
